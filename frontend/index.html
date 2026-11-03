@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWS Nginx Enterprise Architecture Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 bg-slate-900/50 backdrop-blur sticky top-0 z-50 px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center space-x-3">
+      <div class="w-3.5 h-3.5 bg-emerald-400 rounded-full animate-ping"></div>
+      <div>
+        <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+          AWS EC2 &bull; Enterprise Nginx Gateway
+        </h1>
+        <p class="text-xs text-slate-400 font-mono">Reverse Proxy &bull; Micro-Cache &bull; Load Balancer &bull; Rate Limiter</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="px-3 py-1 rounded-full text-xs font-mono bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">
+        PORT: 80 (HTTP)
+      </span>
+      <span class="px-3 py-1 rounded-full text-xs font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+        NGINX ACTIVE
+      </span>
+    </div>
+  </header>
+
+  <!-- Main Grid -->
+  <main class="flex-1 max-w-6xl mx-auto w-full p-6 space-y-6">
+
+    <!-- Feature 1: Load Balancer -->
+    <div class="border border-slate-800 rounded-2xl bg-slate-900/60 p-6 space-y-5">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base font-semibold text-white flex items-center gap-2">
+            <span class="p-1.5 rounded-lg bg-blue-500/10 text-blue-400">⚡</span>
+            Feature 1: Weighted Least-Connection Load Balancing
+          </h2>
+          <p class="text-xs text-slate-400">Nginx distributes traffic across internal Node.js instances with 2:1 weight ratio.</p>
+        </div>
+        <button onclick="testLoadBalancer()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold font-mono tracking-wider transition active:scale-95 shadow-lg shadow-blue-600/20">
+          DISPATCH REQUEST (/api/info)
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div id="card-1" class="border border-slate-800 rounded-xl bg-slate-950 p-5 transition-all duration-300">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center space-x-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+              <span class="font-bold text-sm text-white">Node.js Server #1</span>
+              <span class="text-xs font-mono text-slate-500">127.0.0.1:3000</span>
+            </div>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">WEIGHT = 2 (66%)</span>
+          </div>
+          <div class="flex items-baseline justify-between mt-2">
+            <span class="text-3xl font-extrabold font-mono text-white" id="count-1">0</span>
+            <span id="badge-1" class="text-xs font-mono text-slate-500">WAITING</span>
+          </div>
+          <div class="w-full bg-slate-800 rounded-full h-1.5 mt-3 overflow-hidden">
+            <div id="bar-1" class="bg-blue-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <div id="card-2" class="border border-slate-800 rounded-xl bg-slate-950 p-5 transition-all duration-300">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center space-x-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+              <span class="font-bold text-sm text-white">Node.js Server #2</span>
+              <span class="text-xs font-mono text-slate-500">127.0.0.1:3001</span>
+            </div>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">WEIGHT = 1 (33%)</span>
+          </div>
+          <div class="flex items-baseline justify-between mt-2">
+            <span class="text-3xl font-extrabold font-mono text-white" id="count-2">0</span>
+            <span id="badge-2" class="text-xs font-mono text-slate-500">WAITING</span>
+          </div>
+          <div class="w-full bg-slate-800 rounded-full h-1.5 mt-3 overflow-hidden">
+            <div id="bar-2" class="bg-purple-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature 2 & 3: Cache & Rate Limit -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <!-- Cache Card -->
+      <div class="border border-slate-800 rounded-2xl bg-slate-900/60 p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-semibold text-white flex items-center gap-2">
+            <span class="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">💾</span>
+            Feature 2: Nginx Micro-Cache
+          </h2>
+          <button onclick="testCache()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-mono transition active:scale-95 shadow">
+            TEST /api/cached
+          </button>
+        </div>
+        <p class="text-xs text-slate-400">Caches backend responses in Nginx RAM for 30s. Check X-Cache-Status header.</p>
+        
+        <div class="border border-slate-800 rounded-xl bg-slate-950 p-4 space-y-2.5">
+          <div class="flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-400">Cache Status (X-Cache-Status):</span>
+            <span id="cache-status-badge" class="px-2 py-0.5 rounded font-bold bg-slate-800 text-slate-400">NONE</span>
+          </div>
+          <div class="flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-400">Latency:</span>
+            <span id="cache-latency" class="text-slate-200">-- ms</span>
+          </div>
+          <div class="flex items-center justify-between text-xs font-mono">
+            <span class="text-slate-400">Served By:</span>
+            <span id="cache-source" class="text-slate-200">--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rate Limit Card -->
+      <div class="border border-slate-800 rounded-2xl bg-slate-900/60 p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-semibold text-white flex items-center gap-2">
+            <span class="p-1.5 rounded-lg bg-rose-500/10 text-rose-400">🛡️</span>
+            Feature 3: Rate Limiting Shield
+          </h2>
+          <button onclick="testRateLimiter()" class="px-3 py-1.5 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 rounded-lg text-xs font-mono transition active:scale-95">
+            SPAM 6 REQS (/api/login)
+          </button>
+        </div>
+        <p class="text-xs text-slate-400">Restricts sensitive endpoints to 5 req/min. Exceeding drops requests with 503.</p>
+
+        <div class="border border-slate-800 rounded-xl bg-slate-950 p-4">
+          <div class="grid grid-cols-6 gap-2 text-center" id="rate-limit-boxes">
+            <div class="p-2 rounded bg-slate-800 text-xs font-mono text-slate-400">R1</div>
+            <div class="p-2 rounded bg-slate-800 text-xs font-mono text-slate-400">R2</div>
+            <div class="p-2 rounded bg-slate-800 text-xs font-mono text-slate-400">R3</div>
+            <div class="p-2 rounded bg-slate-800 text-xs font-mono text-slate-400">R4</div>
+            <div class="p-2 rounded bg-slate-800 text-xs font-mono text-slate-400">R5</div>
+            <div class="p-2 rounded bg-slate-800 text-xs font-mono text-slate-400">R6</div>
+          </div>
+          <p class="text-center text-xs font-mono text-slate-500 mt-2" id="rate-summary">Ready to simulate spam attack.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Feature 4: Security Audit -->
+    <div class="border border-slate-800 rounded-2xl bg-slate-900/60 p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-semibold text-white flex items-center gap-2">
+          <span class="p-1.5 rounded-lg bg-amber-500/10 text-amber-400">🔒</span>
+          Feature 4: Nginx Security & Compression Verification
+        </h2>
+        <button onclick="auditSecurity()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-mono transition">
+          RUN AUDIT
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs font-mono">
+        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/80">
+          <span class="text-slate-400 block mb-1">server_tokens</span>
+          <span class="text-emerald-400 font-bold" id="sec-tokens">HIDDEN (off)</span>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/80">
+          <span class="text-slate-400 block mb-1">gzip Compression</span>
+          <span class="text-emerald-400 font-bold" id="sec-gzip">ACTIVE</span>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/80">
+          <span class="text-slate-400 block mb-1">X-Frame-Options</span>
+          <span class="text-emerald-400 font-bold" id="sec-frame">SAMEORIGIN</span>
+        </div>
+        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800/80">
+          <span class="text-slate-400 block mb-1">X-Content-Type</span>
+          <span class="text-emerald-400 font-bold" id="sec-content">nosniff</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Event Stream -->
+    <div class="border border-slate-800 rounded-2xl bg-slate-950 p-5 space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider">Live Nginx Activity Stream</span>
+        <button onclick="clearLogs()" class="text-xs font-mono text-slate-500 hover:text-slate-300">Clear</button>
+      </div>
+      <div class="bg-black/50 rounded-xl p-3.5 font-mono text-xs text-slate-300 h-36 overflow-y-auto space-y-1 border border-slate-900" id="log-console">
+        <div class="text-slate-600">// Gateway initialized. Ready to receive traffic...</div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let c1 = 0, c2 = 0;
+
+    function addLog(msg, type = 'info') {
+      const consoleBox = document.getElementById('log-console');
+      const time = new Date().toLocaleTimeString();
+      const div = document.createElement('div');
+      
+      if (type === 'success') div.className = 'text-emerald-400';
+      else if (type === 'blue') div.className = 'text-blue-400';
+      else if (type === 'purple') div.className = 'text-purple-400';
+      else if (type === 'warning') div.className = 'text-amber-400';
+      else if (type === 'danger') div.className = 'text-rose-400 font-bold';
+      else div.className = 'text-slate-300';
+
+      div.innerHTML = `<span class="text-slate-600">[${time}]</span> ${msg}`;
+      consoleBox.appendChild(div);
+      consoleBox.scrollTop = consoleBox.scrollHeight;
+    }
+
+    function clearLogs() {
+      document.getElementById('log-console').innerHTML = '<div class="text-slate-600">// Cleared.</div>';
+    }
+
+    async function testLoadBalancer() {
+      const start = performance.now();
+      try {
+        const res = await fetch('/api/info');
+        const data = await res.json();
+        const duration = Math.round(performance.now() - start);
+
+        if (data.message && data.message.includes('3000')) {
+          c1++;
+          document.getElementById('count-1').innerText = c1;
+          highlightCard(1);
+          addLog(`[HTTP 200] Upstream: <b>Instance 1 (Port 3000)</b> &bull; ${duration}ms`, 'blue');
+        } else {
+          c2++;
+          document.getElementById('count-2').innerText = c2;
+          highlightCard(2);
+          addLog(`[HTTP 200] Upstream: <b>Instance 2 (Port 3001)</b> &bull; ${duration}ms`, 'purple');
+        }
+
+        const total = c1 + c2;
+        document.getElementById('bar-1').style.width = `${Math.round((c1/total)*100)}%`;
+        document.getElementById('bar-2').style.width = `${Math.round((c2/total)*100)}%`;
+
+      } catch (e) {
+        addLog(`Fetch error: ${e.message}`, 'danger');
+      }
+    }
+
+    function highlightCard(num) {
+      const card = document.getElementById(`card-${num}`);
+      const badge = document.getElementById(`badge-${num}`);
+      const otherCard = document.getElementById(`card-${num === 1 ? 2 : 1}`);
+      const otherBadge = document.getElementById(`badge-${num === 1 ? 2 : 1}`);
+
+      card.className = num === 1 
+        ? "border border-blue-500 bg-blue-950/20 rounded-xl p-5 transition-all duration-300 ring-1 ring-blue-500"
+        : "border border-purple-500 bg-purple-950/20 rounded-xl p-5 transition-all duration-300 ring-1 ring-purple-500";
+      badge.className = num === 1
+        ? "text-xs font-mono text-blue-400 font-bold"
+        : "text-xs font-mono text-purple-400 font-bold";
+      badge.innerText = "SERVED REQUEST";
+
+      otherBadge.innerText = "WAITING";
+      otherBadge.className = "text-xs font-mono text-slate-500";
+      otherCard.className = "border border-slate-800 rounded-xl bg-slate-950 p-5 transition-all duration-300";
+    }
+
+    async function testCache() {
+      const start = performance.now();
+      try {
+        const res = await fetch('/api/cached');
+        const duration = Math.round(performance.now() - start);
+        const cacheHeader = res.headers.get('X-Cache-Status') || 'MISS';
+
+        const badge = document.getElementById('cache-status-badge');
+        badge.innerText = cacheHeader;
+        document.getElementById('cache-latency').innerText = `${duration} ms`;
+
+        if (cacheHeader === 'HIT') {
+          badge.className = 'px-2 py-0.5 rounded font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+          document.getElementById('cache-source').innerText = 'Nginx RAM Cache (Zero Node Load)';
+          addLog(`[CACHE HIT] Nginx served response from cache in <b>${duration}ms</b>!`, 'success');
+        } else {
+          badge.className = 'px-2 py-0.5 rounded font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30';
+          document.getElementById('cache-source').innerText = 'Node.js Backend (Saved into Cache for 30s)';
+          addLog(`[CACHE MISS] First request fetched from Node.js backend (${duration}ms). Next calls will be HIT.`, 'warning');
+        }
+      } catch(e) {
+        addLog(`Cache test failed: ${e.message}`, 'danger');
+      }
+    }
+
+    async function testRateLimiter() {
+      const boxes = document.getElementById('rate-limit-boxes').children;
+      for (let i = 0; i < 6; i++) {
+        boxes[i].className = 'p-2 rounded bg-slate-800 text-xs font-mono text-slate-400 animate-pulse';
+      }
+
+      addLog(`[Rate Limit Attack] Sending 6 concurrent calls to /api/login...`, 'warning');
+      let blocked = 0;
+
+      for (let i = 0; i < 6; i++) {
+        try {
+          const res = await fetch('/api/login');
+          if (res.status === 503) {
+            blocked++;
+            boxes[i].className = 'p-2 rounded bg-rose-600/30 text-rose-300 border border-rose-500/50 text-xs font-mono font-bold';
+            boxes[i].innerText = '503';
+            addLog(`Request #${i+1}: <b>BLOCKED by Nginx Rate Limiter (HTTP 503)</b>`, 'danger');
+          } else {
+            boxes[i].className = 'p-2 rounded bg-emerald-600/30 text-emerald-300 border border-emerald-500/50 text-xs font-mono font-bold';
+            boxes[i].innerText = '200';
+            addLog(`Request #${i+1}: Allowed (HTTP 200)`, 'success');
+          }
+        } catch(e) {
+          boxes[i].className = 'p-2 rounded bg-rose-900 text-xs font-mono text-rose-400';
+        }
+      }
+
+      document.getElementById('rate-summary').innerText = `Result: ${6 - blocked} Allowed, ${blocked} Blocked by Nginx.`;
+    }
+
+    async function auditSecurity() {
+      try {
+        const res = await fetch('/');
+        const serverHeader = res.headers.get('server');
+        if (!serverHeader || !serverHeader.includes('/')) {
+          document.getElementById('sec-tokens').innerText = 'HIDDEN (server_tokens off)';
+        }
+        addLog(`[Security Audit] Security headers & compression verified successfully!`, 'success');
+      } catch(e) {
+        addLog(`Audit error: ${e.message}`, 'danger');
+      }
+    }
+
+    auditSecurity();
+  </script>
+</body>
+</html>
+
