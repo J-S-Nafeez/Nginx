@@ -13,20 +13,32 @@ This project bridges Linux Systems Administration, Cloud Networking, and Applica
 ---
 
 ## 📑 Table of Contents
-1. [Why This Architecture? (Problem vs. Solution)](#-why-this-architecture-problem-vs-solution)
-2. [Live Visual Proof & Telemetry Dashboard](#-live-visual-proof--telemetry-dashboard)
-3. [System Architecture Diagram](#-system-architecture-diagram)
-4. [Linux Filesystem Layout Map](#-linux-filesystem-layout-map)
-5. [Complete Step-by-Step Reproduction Guide](#-complete-step-by-step-reproduction-guide)
-   - [Phase 1: AWS Security Group Configuration](#phase-1-aws-security-group-configuration)
-   - [Phase 2: System Update & Nginx Installation](#phase-2-system-update--nginx-installation)
-   - [Phase 3: Deploying Node.js Backend Cluster](#phase-3-deploying-nodejs-backend-cluster)
-   - [Phase 4: Configuring Enterprise Nginx](#phase-4-configuring-enterprise-nginx)
-   - [Phase 5: Deploying Interactive Frontend Dashboard](#phase-5-deploying-interactive-frontend-dashboard)
-   - [Phase 6: Testing & Live Verification](#phase-6-testing--live-verification)
-6. [Deep Technical Breakdown of Concepts](#-deep-technical-breakdown-of-concepts)
-7. [DevOps Troubleshooting & Incident Resolution Playbook](#-devops-troubleshooting--incident-resolution-playbook)
-8. [Interview Q&A (How to explain this project)](#-interview-qa-how-to-explain-this-project)
+- [⚡ Production-Grade AWS Nginx Gateway, Reverse Proxy \& Load Balancer Cluster](#-production-grade-aws-nginx-gateway-reverse-proxy--load-balancer-cluster)
+  - [📑 Table of Contents](#-table-of-contents)
+  - [🎯 Why This Architecture? (Problem vs. Solution)](#-why-this-architecture-problem-vs-solution)
+    - [The Anti-Pattern (What Beginners Do):](#the-anti-pattern-what-beginners-do)
+    - [The Production Solution (What This Project Implements):](#the-production-solution-what-this-project-implements)
+  - [📸 Live Visual Proof \& Telemetry Dashboard](#-live-visual-proof--telemetry-dashboard)
+    - [1. Weighted Load Balancing \& Micro-Cache Telemetry](#1-weighted-load-balancing--micro-cache-telemetry)
+    - [2. Rate-Limiting Attack Simulation \& Security Audit](#2-rate-limiting-attack-simulation--security-audit)
+  - [🏗️ System Architecture Diagram](#️-system-architecture-diagram)
+  - [🗺️ Linux Filesystem Layout Map](#️-linux-filesystem-layout-map)
+  - [🛠️ Complete Step-by-Step Reproduction Guide](#️-complete-step-by-step-reproduction-guide)
+    - [Phase 1: AWS Security Group Configuration](#phase-1-aws-security-group-configuration)
+    - [Phase 2: System Update \& Nginx Installation](#phase-2-system-update--nginx-installation)
+    - [Phase 3: Deploying Node.js Backend Cluster](#phase-3-deploying-nodejs-backend-cluster)
+    - [Phase 4: Configuring Enterprise Nginx](#phase-4-configuring-enterprise-nginx)
+    - [Phase 5: Deploying Interactive Frontend Dashboard](#phase-5-deploying-interactive-frontend-dashboard)
+    - [Phase 6: Testing \& Live Verification](#phase-6-testing--live-verification)
+      - [Verification Matrix:](#verification-matrix)
+  - [🔬 Deep Technical Breakdown of Concepts](#-deep-technical-breakdown-of-concepts)
+    - [1. The Reverse Proxy Mechanism (`proxy_pass`)](#1-the-reverse-proxy-mechanism-proxy_pass)
+    - [2. Leaky-Bucket Rate Limiting (`limit_req_zone`)](#2-leaky-bucket-rate-limiting-limit_req_zone)
+    - [3. Edge Micro-Caching (`proxy_cache`)](#3-edge-micro-caching-proxy_cache)
+  - [🛠️ DevOps Troubleshooting \& Incident Resolution Playbook](#️-devops-troubleshooting--incident-resolution-playbook)
+    - [Incident 1: Port Collision \& Failed Process Bind (`EADDRINUSE`)](#incident-1-port-collision--failed-process-bind-eaddrinuse)
+    - [Incident 2: Nano Unprivileged Buffer Lock (`[ File is unwritable ]`)](#incident-2-nano-unprivileged-buffer-lock--file-is-unwritable-)
+  - [👤 Author \& Maintainer](#-author--maintainer)
 
 ---
 
@@ -716,19 +728,8 @@ During the implementation of this project, real-world Linux system administratio
 * **Symptom**: Modifying `/var/www/master-project/index.html` threw permission denial in editor buffers.
 * **Resolution**: Replaced interactive in-place editing with automated `sudo tee` heredoc pipelines, ensuring atomic file replacement with guaranteed root privilege escalation.
 
----
-
-## 💬 Interview Q&A (How to explain this project)
-
-**Q: Why use Nginx when Node.js can listen on port 80 directly?**
-> *"Node.js is a single-threaded runtime optimized for business logic, not raw network I/O. Running it on Port 80 requires root privileges, which violates security best practices. Nginx acts as an unprivileged reverse proxy that handles TLS termination, zero-copy static asset streaming, rate limiting, and connection queuing, freeing the Node.js event loop to process API requests."*
-
-**Q: How does the micro-cache behave during high concurrency?**
-> *"The micro-cache stores pre-computed HTTP 200 responses in an in-memory 10MB hash table for 30 seconds. When 10,000 clients request `/api/cached`, Nginx answers the first client by calling Node.js and saving the response (`X-Cache-Status: MISS`). The subsequent 9,999 requests are served directly from Nginx RAM (`X-Cache-Status: HIT`) in under 2 milliseconds, reducing backend load by over 99%."*
-
----
 
 ## 👤 Author & Maintainer
-Built and deployed by **[Your Name]**.  
+Built and deployed by *Jammalamadugu Shaik Nafeez**.  
 Focus: Cloud Architecture, Linux Systems Administration, and High-Performance Web Infrastructure.
 
